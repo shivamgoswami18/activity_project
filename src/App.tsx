@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import type { FormEventHandler } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
 function isValidEmail(value: string) {
@@ -8,6 +7,12 @@ function isValidEmail(value: string) {
 }
 
 function App() {
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = globalThis.localStorage?.getItem('sc_theme')
+    if (saved === 'dark' || saved === 'light') return saved
+    const prefersDark = globalThis.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? true
+    return prefersDark ? 'dark' : 'light'
+  })
   const [menuOpen, setMenuOpen] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -19,10 +24,16 @@ function App() {
   })
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle')
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('sc_theme', theme)
+  }, [theme])
+
+  const themeLabel = useMemo(() => (theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'), [theme])
+
   let emailError = ''
   if (email.trim().length === 0) emailError = 'Please enter your email.'
-  else if (isValidEmail(email)) emailError = ''
-  else emailError = 'Please enter a valid email address.'
+  else if (!isValidEmail(email)) emailError = 'Please enter a valid email address.'
 
   const errors = {
     name: name.trim().length === 0 ? 'Please enter your name.' : '',
@@ -40,7 +51,11 @@ function App() {
     closeMenu()
   }
 
-  const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+  function toggleTheme() {
+    setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+  }
+
+  const onSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault()
     setTouched({ name: true, email: true, message: true })
     if (!isFormValid) return
@@ -84,6 +99,10 @@ function App() {
           </nav>
 
           <div className="headerCtas">
+            <button className="btn btnGhost" type="button" onClick={toggleTheme} aria-label={themeLabel}>
+              <span className="themeDot" aria-hidden="true" />
+              {theme === 'dark' ? 'Dark' : 'Light'}
+            </button>
             <a className="btn btnGhost" href="#pricing">
               View plans
             </a>
@@ -116,6 +135,10 @@ function App() {
                 Contact
               </a>
               <div className="mobileMenuCtas">
+                <button className="btn btnGhost btnFull" type="button" onClick={toggleTheme} aria-label={themeLabel}>
+                  <span className="themeDot" aria-hidden="true" />
+                  {theme === 'dark' ? 'Dark' : 'Light'} mode
+                </button>
                 <a className="btn btnGhost" href="#pricing" onClick={onNavClick}>
                   View plans
                 </a>
