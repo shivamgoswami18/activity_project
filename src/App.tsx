@@ -74,8 +74,7 @@ function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = globalThis.localStorage?.getItem('sc_theme')
     if (saved === 'dark' || saved === 'light') return saved
-    const prefersDark = globalThis.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? true
-    return prefersDark ? 'dark' : 'light'
+    return 'dark' // Default to dark mode on refresh
   })
   const [menuOpen, setMenuOpen] = useState(false)
   const [name, setName] = useState('')
