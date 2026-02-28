@@ -443,6 +443,25 @@
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.26);
   display: grid;
   gap: 14px;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.priceCard::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(94, 234, 212, 0.1), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.priceCard:hover::before {
+  opacity: 1;
 }
 
 .priceCardFeatured {
@@ -734,4 +753,105 @@ html[data-theme="light"] .mobileMenu {
 html[data-theme="light"] .input,
 html[data-theme="light"] .textarea {
   background: rgba(247, 250, 252, 0.72);
+}
+
+/* Floating Images Styles */
+.floatingImage {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(0.5px) drop-shadow(0 0 20px rgba(94, 234, 212, 0.3));
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+  animation: floatPulse 4s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+@keyframes floatPulse {
+  0%, 100% {
+    filter: blur(0.5px) brightness(1) drop-shadow(0 0 20px rgba(94, 234, 212, 0.3));
+  }
+  50% {
+    filter: blur(1px) brightness(1.3) drop-shadow(0 0 30px rgba(96, 165, 250, 0.5));
+  }
+}
+
+.section {
+  position: relative;
+  z-index: 2;
+}
+
+/* Enhanced card animations */
+.priceCard {
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.priceCard:hover {
+  box-shadow: 0 20px 60px rgba(94, 234, 212, 0.3), 0 0 40px rgba(96, 165, 250, 0.2);
+}
+
+/* Section head animations */
+.sectionHead {
+  position: relative;
+  z-index: 10;
+}
+
+/* Form animations */
+.form {
+  position: relative;
+  z-index: 10;
+}
+
+/* Contact copy animations */
+.contactCopy {
+  position: relative;
+  z-index: 10;
+}
+
+/* Typewriter container to prevent layout shifts */
+.typewriterContainer {
+  display: inline;
+}
+
+.typewriterText {
+  position: relative;
+  display: inline-block;
+  min-width: fit-content;
+}
+
+.typewriterVisible {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+}
+
+.typewriterHidden {
+  display: inline-block;
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Typewriter cursor animation */
+.cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--text);
+  animation: blink 1s infinite;
+  font-weight: 300;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
 }

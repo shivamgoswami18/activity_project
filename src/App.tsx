@@ -1,5 +1,69 @@
 import { useEffect, useMemo, useState } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import './App.css'
+
+// Typewriter component for smooth character-by-character typing animation (infinite loop)
+function TypewriterText({ 
+  staticText = '', 
+  animatedText = '', 
+  speed = 50, 
+  delay = 0,
+  pauseDuration = 2000
+}: Readonly<{ staticText?: string; animatedText?: string; speed?: number; delay?: number; pauseDuration?: number }>) {
+  const [displayedText, setDisplayedText] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+
+  useEffect(() => {
+    let typingInterval: ReturnType<typeof setInterval> | null = null
+    let pauseTimer: ReturnType<typeof setTimeout> | null = null
+    
+    const startTyping = () => {
+      setDisplayedText('')
+      setIsTyping(true)
+      let currentIndex = 0
+      
+      typingInterval = setInterval(() => {
+        if (currentIndex < animatedText.length) {
+          setDisplayedText(animatedText.slice(0, currentIndex + 1))
+          currentIndex++
+        } else {
+          if (typingInterval) {
+            clearInterval(typingInterval)
+            typingInterval = null
+          }
+          setIsTyping(false)
+          
+          // Wait for pause duration, then start typing again
+          pauseTimer = setTimeout(() => {
+            startTyping()
+          }, pauseDuration)
+        }
+      }, speed)
+    }
+    
+    // Initial delay before starting
+    const startTimer = setTimeout(() => {
+      startTyping()
+    }, delay)
+    
+    return () => {
+      if (startTimer) clearTimeout(startTimer)
+      if (typingInterval) clearInterval(typingInterval)
+      if (pauseTimer) clearTimeout(pauseTimer)
+    }
+  }, [animatedText, speed, delay, pauseDuration])
+
+  return (
+    <span className="typewriterContainer">
+      {staticText}
+      <span className="typewriterText">
+        <span className="typewriterVisible">{displayedText}</span>
+        <span className="typewriterHidden" aria-hidden="true">{animatedText}</span>
+        {isTyping && <span className="cursor" aria-hidden="true">|</span>}
+      </span>
+    </span>
+  )
+}
 
 function isValidEmail(value: string) {
   // Simple, practical email check (good enough for basic client validation)
@@ -108,8 +172,8 @@ function App() {
             </a>
             <a className="btn btnPrimary" href="#contact">
               Talk to us
-            </a>
-          </div>
+        </a>
+      </div>
 
           <button
             className="iconBtn mobileOnly"
@@ -138,7 +202,7 @@ function App() {
                 <button className="btn btnGhost btnFull" type="button" onClick={toggleTheme} aria-label={themeLabel}>
                   <span className="themeDot" aria-hidden="true" />
                   {theme === 'dark' ? 'Dark' : 'Light'} mode
-                </button>
+        </button>
                 <a className="btn btnGhost" href="#pricing" onClick={onNavClick}>
                   View plans
                 </a>
@@ -153,10 +217,43 @@ function App() {
 
       <main>
         <section id="home" className="section hero" aria-label="Home">
+          {/* Floating decorative images */}
+          <FloatingImage
+            src="data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='60' cy='60' r='50' fill='%235eead4' opacity='0.2'/%3E%3Ccircle cx='60' cy='60' r='30' fill='%2360a5fa' opacity='0.3'/%3E%3C/svg%3E"
+            initialX={-200}
+            initialY={100}
+            scrollRange={[0, 0.3]}
+            delay={0}
+            size={120}
+          />
+          <FloatingImage
+            src="data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='10' y='10' width='80' height='80' rx='20' fill='%23a78bfa' opacity='0.25'/%3E%3Crect x='25' y='25' width='50' height='50' rx='10' fill='%235eead4' opacity='0.3'/%3E%3C/svg%3E"
+            initialX={globalThis.window ? globalThis.window.innerWidth + 100 : 1200}
+            initialY={200}
+            scrollRange={[0, 0.4]}
+            delay={0.2}
+            size={100}
+          />
+          <FloatingImage
+            src="data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='40,10 70,60 10,60' fill='%2360a5fa' opacity='0.25'/%3E%3Cpolygon points='40,25 55,50 25,50' fill='%235eead4' opacity='0.3'/%3E%3C/svg%3E"
+            initialX={-150}
+            initialY={400}
+            scrollRange={[0, 0.5]}
+            delay={0.4}
+            size={80}
+          />
+
           <div className="container heroGrid">
             <div className="heroCopy">
               <p className="eyebrow">Safety-first teams move faster.</p>
-              <h1 className="heroTitle">Build a workplace where safe choices are the easy choices.</h1>
+              <h1 className="heroTitle">
+                <TypewriterText 
+                  staticText="Build a workplace where safe choices are " 
+                  animatedText="the easy choices." 
+                  speed={50} 
+                  delay={500} 
+                />
+              </h1>
               <p className="heroSubtitle">
                 “Safety and Culture” is a lightweight toolkit for practical safety routines, culture signals, and
                 leadership visibility—designed for clarity, consistency, and real adoption.
@@ -218,14 +315,59 @@ function App() {
         </section>
 
         <section id="pricing" className="section" aria-label="Pricing">
+          {/* Floating images for pricing section */}
+          <FloatingImage
+            src="data:image/svg+xml,%3Csvg width='150' height='150' viewBox='0 0 150 150' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='75' cy='75' r='60' fill='%235eead4' opacity='0.15'/%3E%3Ccircle cx='75' cy='75' r='40' fill='%2360a5fa' opacity='0.2'/%3E%3Ccircle cx='75' cy='75' r='20' fill='%23a78bfa' opacity='0.25'/%3E%3C/svg%3E"
+            initialX={globalThis.window ? globalThis.window.innerWidth + 150 : 1300}
+            initialY={50}
+            scrollRange={[0.2, 0.6]}
+            delay={0}
+            size={150}
+          />
+          <FloatingImage
+            src="data:image/svg+xml,%3Csvg width='90' height='90' viewBox='0 0 90 90' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='5' y='5' width='80' height='80' rx='15' fill='%235eead4' opacity='0.2'/%3E%3Crect x='20' y='20' width='50' height='50' rx='8' fill='%2360a5fa' opacity='0.25'/%3E%3C/svg%3E"
+            initialX={-200}
+            initialY={150}
+            scrollRange={[0.25, 0.65]}
+            delay={0.3}
+            size={90}
+          />
+          <FloatingImage
+            src="data:image/svg+xml,%3Csvg width='110' height='110' viewBox='0 0 110 110' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M55,10 L100,90 L10,90 Z' fill='%23a78bfa' opacity='0.2'/%3E%3Cpath d='M55,30 L80,80 L30,80 Z' fill='%235eead4' opacity='0.25'/%3E%3C/svg%3E"
+            initialX={globalThis.window ? globalThis.window.innerWidth + 110 : 1200}
+            initialY={300}
+            scrollRange={[0.3, 0.7]}
+            delay={0.5}
+            size={110}
+          />
+
           <div className="container">
-            <div className="sectionHead">
+            <motion.div
+              className="sectionHead"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            >
               <h2 className="sectionTitle">Pricing that scales with your team</h2>
               <p className="sectionSubtitle">Start small, prove adoption, then roll out across sites.</p>
-            </div>
+            </motion.div>
 
-            <div className="pricingGrid">
-              <article className="priceCard">
+            <motion.div
+              className="pricingGrid"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.6, staggerChildren: 0.2 }}
+            >
+              <motion.article
+                className="priceCard"
+                initial={{ opacity: 0, x: -100, rotateY: -15 }}
+                whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.05, y: -10, rotateY: 5 }}
+              >
                 <header className="priceHead">
                   <h3 className="priceName">Starter</h3>
                   <p className="priceLine">
@@ -243,9 +385,17 @@ function App() {
                 <a className="btn btnGhost btnFull" href="#contact">
                   Choose Starter
                 </a>
-              </article>
+              </motion.article>
 
-              <article className="priceCard priceCardFeatured" aria-label="Most popular plan">
+              <motion.article
+                className="priceCard priceCardFeatured"
+                aria-label="Most popular plan"
+                initial={{ opacity: 0, y: 100, scale: 0.8 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.08, y: -15, rotateY: -5 }}
+              >
                 <div className="badge">Most popular</div>
                 <header className="priceHead">
                   <h3 className="priceName">Team</h3>
@@ -264,9 +414,16 @@ function App() {
                 <a className="btn btnPrimary btnFull" href="#contact">
                   Choose Team
                 </a>
-              </article>
+              </motion.article>
 
-              <article className="priceCard">
+              <motion.article
+                className="priceCard"
+                initial={{ opacity: 0, x: 100, rotateY: 15 }}
+                whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.05, y: -10, rotateY: -5 }}
+              >
                 <header className="priceHead">
                   <h3 className="priceName">Enterprise</h3>
                   <p className="priceLine">
@@ -284,21 +441,45 @@ function App() {
                 <a className="btn btnGhost btnFull" href="#contact">
                   Talk Enterprise
                 </a>
-              </article>
-            </div>
+              </motion.article>
+            </motion.div>
 
             <p className="finePrint">
               No backend needed for this demo. In production, you’d connect form submissions to your CRM/helpdesk.
-            </p>
-          </div>
+        </p>
+      </div>
         </section>
 
         <section id="contact" className="section contact" aria-label="Contact">
+          {/* Floating images for contact section */}
+          <FloatingImage
+            src="data:image/svg+xml,%3Csvg width='130' height='130' viewBox='0 0 130 130' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='65' cy='65' r='55' fill='%2360a5fa' opacity='0.15'/%3E%3Ccircle cx='65' cy='65' r='35' fill='%235eead4' opacity='0.2'/%3E%3C/svg%3E"
+            initialX={-180}
+            initialY={100}
+            scrollRange={[0.5, 0.9]}
+            delay={0}
+            size={130}
+          />
+          <FloatingImage
+            src="data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='10' y='10' width='80' height='80' rx='20' fill='%23a78bfa' opacity='0.2'/%3E%3Crect x='25' y='25' width='50' height='50' rx='10' fill='%2360a5fa' opacity='0.25'/%3E%3C/svg%3E"
+            initialX={globalThis.window ? globalThis.window.innerWidth + 120 : 1200}
+            initialY={250}
+            scrollRange={[0.55, 0.95]}
+            delay={0.4}
+            size={100}
+          />
+
           <div className="container contactGrid">
-            <div className="contactCopy">
+            <motion.div
+              className="contactCopy"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            >
               <h2 className="sectionTitle">Contact</h2>
               <p className="sectionSubtitle">
-                Tell us what you’re building. We’ll reply with a simple rollout plan and a short demo.
+                Tell us what you're building. We'll reply with a simple rollout plan and a short demo.
               </p>
 
               <div className="contactNotes">
@@ -315,9 +496,17 @@ function App() {
                   <p className="noteBody">Typically within 1 business day.</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <form className="form" onSubmit={onSubmit} noValidate>
+            <motion.form
+              className="form"
+              onSubmit={onSubmit}
+              noValidate
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            >
               <div className="field">
                 <label className="label" htmlFor="name">
                   Name
@@ -379,7 +568,7 @@ function App() {
                   Message sent (demo mode). Thanks—someone will follow up shortly.
                 </output>
               )}
-            </form>
+            </motion.form>
           </div>
         </section>
       </main>
@@ -404,6 +593,49 @@ function App() {
         </div>
       </footer>
     </div>
+  )
+}
+
+// Floating Image Component with scroll animations
+function FloatingImage({
+  src,
+  initialX,
+  initialY,
+  scrollRange,
+  delay,
+  size,
+}: Readonly<{
+  src: string
+  initialX: number
+  initialY: number
+  scrollRange: [number, number]
+  delay: number
+  size: number
+}>) {
+  const { scrollYProgress } = useScroll()
+  const opacity = useTransform(scrollYProgress, scrollRange, [0, 1, 1, 0])
+  const x = useTransform(scrollYProgress, scrollRange, [initialX, initialX * 0.3, initialX * 0.3, initialX * 1.5])
+  const y = useTransform(scrollYProgress, scrollRange, [initialY, initialY * 0.8, initialY * 0.8, initialY * 1.2])
+  const scale = useTransform(scrollYProgress, scrollRange, [0.5, 1, 1, 0.3])
+  const rotate = useTransform(scrollYProgress, scrollRange, [0, 360, 360, 720])
+
+  return (
+    <motion.img
+      src={src}
+      alt=""
+      className="floatingImage"
+      style={{
+        opacity,
+        x,
+        y,
+        scale,
+        rotate,
+        width: `${size}px`,
+        height: `${size}px`,
+      }}
+      initial={{ opacity: 0 }}
+      transition={{ delay, duration: 0.5 }}
+    />
   )
 }
 
